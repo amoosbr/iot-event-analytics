@@ -1,6 +1,6 @@
 name: Test IoTea Docker Compose
 
-on: [push]
+on: push
 
 jobs:
   integration-test:
@@ -13,7 +13,7 @@ jobs:
       with:
         node-version: '12.x'
 
-    - name: Setup & start platform
+    - name: Start iotea platform
       working-directory: ${{github.workspace}}/docker-compose
       shell: bash
       run: docker-compose -f docker-compose.mosquitto.yml -f docker-compose.platform.yml --env-file .env up --build -d
