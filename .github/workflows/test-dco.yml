@@ -1,0 +1,30 @@
+name: Test IoTea Docker Compose
+
+on: [push]
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+    name: Run IoTea integration tests in Docker Compose
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+
+    - name: Setup & start platform
+      working-directory: ${{github.workspace}}/docker-compose
+      shell: bash
+      run: docker-compose -f docker-compose.mosquitto.yml -f docker-compose.platform.yml --env-file .env up --build -d
+
+    - name: Run integration tests
+      working-directory: ${{github.workspace}}/test/integration-tests
+      shell: bash
+      run: |
+        yarn --frozen-lockfile
+        node ./testset_sdk/javascript/functionProvider.js 2>&1 >/dev/null &
+        node ./testset_sdk/javascript/testSetSDK.js 2>&1 >/dev/null &
+        node ./runner/javascript/test_runner.js
+      timeout-minutes: 1
+
